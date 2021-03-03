@@ -3,19 +3,26 @@
 <head>
     <title>Google Cloud Vision Results</title>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-BmbxuPwQa2lc/FVzBcNJ7UAyJxM6wuqIj61tLrc4wSX0szH/Ev+nYRRuWlolflfl" crossorigin="anonymous">
 </head>
 <body>
-<h1>Annotations Produced for the Image</h1>
-<table border="1">
+<h1>Image Analysis Results</h1>
+
+<table class="table table-success table-striped">
+    <thead class="table-dark">
     <tr>
-        <th>Description</th>
-        <th>Score</th>
+        <th scope="col">Description</th>
+        <th scope="col">Score</th>
     </tr>
+    </thead>
+    <tbody>
     <tr th:each="entry : ${annotations}">
         <td>[[${entry.key}]]</td>
         <td>[[${entry.value}]]</td>
     </tr>
+    </tbody>
 </table>
+
 
 <p>
     <img th:src="${imageUrl}"/>

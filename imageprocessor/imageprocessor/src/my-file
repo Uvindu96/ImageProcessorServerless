@@ -38,3 +38,25 @@ public class WebController {
     }
 }
 set GOOGLE_APPLICATION_CREDENTIALS=C:\Users\User\Downloads\key.json
+
+
+<table border="1">
+    <tr>
+        <th>Description</th>
+        <th>Score</th>
+    </tr>
+    <tr th:each="entry : ${annotations}">
+        <td>[[${entry.key}]]</td>
+        <td>[[${entry.value}]]</td>
+    </tr>
+</table>
+
+
+<div>
+        <h1>Image Label Extraction</h1>
+        <p>Returns labels classifying the content of the image:</p>
+        <form action="/extractLabels">
+            Web URL of image to analyze:
+            <input type="submit"/>
+        </form>
+    </div>

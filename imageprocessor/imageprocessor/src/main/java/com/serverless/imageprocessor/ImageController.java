@@ -5,17 +5,9 @@ import com.google.cloud.vision.v1.Feature.Type;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.gcp.vision.CloudVisionTemplate;
 import org.springframework.core.io.ResourceLoader;
-import org.springframework.http.ResponseEntity;
 import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.ModelAndView;
-import org.springframework.core.io.Resource;
-import com.google.api.gax.paging.Page;
-import com.google.cloud.storage.Blob;
-import com.google.cloud.storage.Bucket;
-import com.google.cloud.storage.Storage;
-import com.google.cloud.storage.StorageOptions;
-import com.google.cloud.storage.CopyWriter;
 
 
 import java.io.IOException;
@@ -39,26 +31,12 @@ public class ImageController {
     @GetMapping("/extractLabels")
     public ModelAndView extractLabels(ModelMap map) {
 
-        String fileName = "";
-        String bucketName = "stone-semiotics-297911-images-input";
-        String projectId = "stone-semiotics-297911";
-        String targetBucket = "stone-semiotics-297911-images-output";
-
-        Storage storage = StorageOptions.newBuilder().setProjectId(projectId).build().getService();
-        Bucket bucket = storage.get(bucketName);
-        Page<Blob> blobs = bucket.list();
-
-        String gcsPath = String.format("gs://%s/%s", bucketName, fileName);
-
-        for (Blob blob : blobs.iterateAll()) {
-            System.out.println("Object Name:"+blob.getName());
-            fileName = blob.getName();
-            gcsPath = String.format("gs://%s/%s", bucketName, blob.getName());
-        }
+        GetImage newImage = new GetImage();
+        String gcsPath = newImage.getImageUrl();
 
         AnnotateImageResponse response =
                 this.cloudVisionTemplate.analyzeImage(
-                        this.resourceLoader.getResource(gcsPath), Type.LABEL_DETECTION);
+                        this.resourceLoader.getResource(newImage.getImageUrl()), Type.LABEL_DETECTION);
 
         Map<String, Float> imageLabels =
                 response
@@ -77,38 +55,16 @@ public class ImageController {
         map.addAttribute("annotations", imageLabels);
         map.addAttribute("imageUrl", gcsPath);
 
-        Blob blob = storage.get(bucketName, fileName);
-        // Write a copy of the object to the target bucket
-        String targetFileName = fileName + "-analyzed";
-        CopyWriter copyWriter = blob.copyTo(targetBucket, targetFileName);
-        Blob copiedBlob = copyWriter.getResult();
-        // Delete the original blob now that we've copied to where we want it, finishing the "move"
-        // operation
-        blob.delete();
+       newImage.moveImage();
 
         return new ModelAndView("result", map);
     }
 
-
     @GetMapping("/extractLandMarkGCS")
     public ModelAndView detectLandMarkGCS (ModelMap map) {
 
-        String fileName = "";
-        String bucketName = "stone-semiotics-297911-images-input";
-        String projectId = "stone-semiotics-297911";
-        String targetBucket = "stone-semiotics-297911-images-output";
-
-        Storage storage = StorageOptions.newBuilder().setProjectId(projectId).build().getService();
-        Bucket bucket = storage.get(bucketName);
-        Page<Blob> blobs = bucket.list();
-
-        String gcsPath = String.format("gs://%s/%s", bucketName, fileName);
-
-        for (Blob blob : blobs.iterateAll()) {
-            System.out.println("Object Name:"+blob.getName());
-            fileName = blob.getName();
-            gcsPath = String.format("gs://%s/%s", bucketName, blob.getName());
-        }
+        GetImage newImage = new GetImage();
+        String gcsPath = newImage.getImageUrl();
 
         AnnotateImageResponse response =
                 this.cloudVisionTemplate.analyzeImage(
@@ -131,14 +87,7 @@ public class ImageController {
         map.addAttribute("annotations", imageLabels);
         map.addAttribute("imageUrl", gcsPath);
 
-        Blob blob = storage.get(bucketName, fileName);
-        // Write a copy of the object to the target bucket
-        String targetFileName = fileName + "-analyzed";
-        CopyWriter copyWriter = blob.copyTo(targetBucket, targetFileName);
-        Blob copiedBlob = copyWriter.getResult();
-        // Delete the original blob now that we've copied to where we want it, finishing the "move"
-        // operation
-        blob.delete();
+        newImage.moveImage();
 
         return new ModelAndView("result", map);
     }
@@ -147,22 +96,8 @@ public class ImageController {
     @GetMapping("/detectTextGcs")
     public ModelAndView detectTextGcs(ModelMap map) throws IOException {
 
-        String fileName = "";
-        String bucketName = "stone-semiotics-297911-images-input";
-        String projectId = "stone-semiotics-297911";
-        String targetBucket = "stone-semiotics-297911-images-output";
-
-        Storage storage = StorageOptions.newBuilder().setProjectId(projectId).build().getService();
-        Bucket bucket = storage.get(bucketName);
-        Page<Blob> blobs = bucket.list();
-
-        String gcsPath = String.format("gs://%s/%s", bucketName, fileName);
-
-        for (Blob blob : blobs.iterateAll()) {
-            System.out.println("Object Name:"+blob.getName());
-            fileName = blob.getName();
-            gcsPath = String.format("gs://%s/%s", bucketName, blob.getName());
-        }
+        GetImage newImage = new GetImage();
+        String gcsPath = newImage.getImageUrl();
 
         List<AnnotateImageRequest> requests = new ArrayList<>();
 
@@ -206,14 +141,7 @@ public class ImageController {
                 map.addAttribute("annotations", imageLabels);
                 map.addAttribute("imageUrl", gcsPath);
 
-                Blob blob = storage.get(bucketName, fileName);
-                // Write a copy of the object to the target bucket
-                String targetFileName = fileName + "-analyzed";
-                CopyWriter copyWriter = blob.copyTo(targetBucket, targetFileName);
-                Blob copiedBlob = copyWriter.getResult();
-                // Delete the original blob now that we've copied to where we want it, finishing the "move"
-                // operation
-                blob.delete();
+                newImage.moveImage();
             }
         }
         return new ModelAndView("result", map);
