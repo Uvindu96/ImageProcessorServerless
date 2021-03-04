@@ -3,6 +3,8 @@ package com.serverless.imageprocessor;
 import com.google.api.gax.paging.Page;
 import com.google.cloud.storage.*;
 
+import java.nio.file.Paths;
+
 public class GetImage {
 
     private static final String PROJECT_ID = "stone-semiotics-297911";
@@ -48,5 +50,34 @@ public class GetImage {
         Blob copiedBlob = copyWriter.getResult();
         blob.delete();
     }
+
+    public void downloadImage (String fileName) {
+
+        String destFilePath = "C:\\Users\\User\\IdeaProjects\\FYPIIT\\imageprocessor\\imageprocessor\\src";
+        String file = fileName;
+
+        Storage storage = StorageOptions.newBuilder().setProjectId(PROJECT_ID).build().getService();
+
+        Blob blob = storage.get(BlobId.of(INPUT_BUCKET_NAME, file));
+        blob.downloadTo(Paths.get(destFilePath));
+
+    }
+
+    public String getFileName () {
+        String fileName = "";
+
+        Storage setStorage = StorageOptions.newBuilder().setProjectId(PROJECT_ID).build().getService();
+        Bucket bucket = setStorage.get(INPUT_BUCKET_NAME);
+        Page<Blob> blobs = bucket.list();
+
+        String gcsPath = String.format("gs://%s/%s", INPUT_BUCKET_NAME, fileName);
+
+        for (Blob blob : blobs.iterateAll()) {
+            System.out.println("Object Name:"+blob.getName());
+            fileName = blob.getName();
+        }
+        return fileName;
+    }
+
 
 }

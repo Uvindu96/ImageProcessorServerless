@@ -8,9 +8,11 @@ import org.springframework.core.io.ResourceLoader;
 import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.ModelAndView;
+import org.tensorflow.Tensor;
 
 
 import java.io.IOException;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -27,6 +29,36 @@ public class ImageController {
 
     @Autowired private CloudVisionTemplate cloudVisionTemplate;
 
+    @GetMapping("/getLabelMLModel")
+    public String getLabelMLModel () {
+
+        GetImage newImage = new GetImage();
+        String getImagePath = newImage.getImageUrl();
+
+        String getOutput = "";
+        PreProcessor newP = new PreProcessor();
+
+        String modelDir = "src/inception5h";
+        String imageFile = getImagePath;
+
+        byte[] graphDef = newP.readAllBytesOrExit(Paths.get(modelDir, "tensorflow_inception_graph.pb"));
+        List<String> labels =
+                newP.readAllLinesOrExit(Paths.get(modelDir, "imagenet_comp_graph_label_strings.txt"));
+        byte[] imageBytes = newP.readAllBytesOrExit(Paths.get(imageFile));
+
+        try (Tensor<Float> image = newP.constructAndExecuteGraphToNormalizeImage(imageBytes)) {
+            float[] labelProbabilities = newP.executeInceptionGraph(graphDef, image);
+            int bestLabelIdx = newP.maxIndex(labelProbabilities);
+            System.out.println(
+                    String.format("BEST MATCH: %s (%.2f%% likely)",
+                            labels.get(bestLabelIdx),
+                            labelProbabilities[bestLabelIdx] * 100f));
+                    getOutput = String.format("BEST MATCH: %s (%.2f%% likely)",
+                    labels.get(bestLabelIdx),
+                    labelProbabilities[bestLabelIdx] * 100f);
+        }
+        return getOutput;
+    }
 
     @GetMapping("/extractLabels")
     public ModelAndView extractLabels(ModelMap map) {
@@ -55,7 +87,7 @@ public class ImageController {
         map.addAttribute("annotations", imageLabels);
         map.addAttribute("imageUrl", gcsPath);
 
-       newImage.moveImage();
+        newImage.moveImage();
 
         return new ModelAndView("result", map);
     }
