@@ -18,7 +18,7 @@
 <div class="container">
     <div class="row">
         <div class="col-sm-4">
-            <h3>Label Extraction ML Model</h3>
+            <h3>Label Extraction</h3>
             <p>This option allows you to detect labels from your Image</p>
             <form action="/getLabelMLModel">
                 Web URL of image to analyze:
@@ -46,6 +46,17 @@
             <p>This option allows you to extract Land Marks in a Image</p>
             <form action="/extractLandMarkGCS">
                 Web URL of image to analyze:
+                <input type="submit"/>
+            </form>
+        </div>
+        <div class="col-sm-4">
+            <h3>ML Model New</h3>
+            <p>This option allows you to extract Land Marks in a Image</p>
+            <form action="/getLabelMLModelNew">
+                Web URL of image to analyze:
+                <input type="text"
+                       name="imageUrl"
+                       value="https://www.google.com/images/branding/googlelogo/1x/googlelogo_color_272x92dp.png"/>
                 <input type="submit"/>
             </form>
         </div>
