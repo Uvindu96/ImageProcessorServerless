@@ -1,0 +1,9 @@
+apiVersion: serving.knative.dev/v1
+kind: Service
+metadata:
+  name: springimage
+spec:
+  template:
+    spec:
+      containers:
+        - image: docker.io/uvindu96/imageprocessor:v15
