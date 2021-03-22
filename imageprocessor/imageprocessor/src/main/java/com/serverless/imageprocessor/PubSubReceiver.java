@@ -2,14 +2,11 @@ package com.serverless.imageprocessor;
 
 import com.google.cloud.pubsub.v1.AckReplyConsumer;
 import com.google.cloud.pubsub.v1.MessageReceiver;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
 import com.google.pubsub.v1.PubsubMessage;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.stereotype.Component;
 
-import java.util.Base64;
 
 @Component
 public class PubSubReceiver implements MessageReceiver {

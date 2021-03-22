@@ -1,22 +1,28 @@
 package com.serverless.imageprocessor;
 
+import com.google.cloud.vision.v1.FaceAnnotation;
+import com.google.cloud.vision.v1.Vertex;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
+import org.springframework.core.io.Resource;
+import org.springframework.util.StreamUtils;
+
+import javax.imageio.ImageIO;
+import java.awt.*;
+import java.awt.image.BufferedImage;
 import java.io.*;
+import java.net.URL;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 
 public class Utill {
 
-    /**
-     * Convert an array of bytes into a List of Strings using UTF-8. A line is
-     * considered to be terminated by any one of a line feed ('\n'), a carriage
-     * return ('\r'), or a carriage return followed immediately by a linefeed.<p/>
-     *
-     * Can be used to parse the output of
-     *
-     * @param bytes the array to convert
-     * @return A new mutable list containing the Strings in the input array. The
-     *         list will be empty if bytes is empty or if it is null.
-     */
+    @Autowired
+    static
+    ApplicationContext ctx;
+
+
     public static List<String> bytesToStringList(byte[] bytes) {
         List<String> lines = new ArrayList<String>();
 
@@ -45,7 +51,6 @@ public class Utill {
                 r.close();
             }
         } catch (IOException e) {
-            // I can't think of a reason we'd get here.
             throw new RuntimeException(e);
         }
 
@@ -53,4 +58,5 @@ public class Utill {
     }
 
 }
+
 

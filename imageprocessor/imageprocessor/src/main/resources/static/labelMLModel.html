@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Serverless Image Processing</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-BmbxuPwQa2lc/FVzBcNJ7UAyJxM6wuqIj61tLrc4wSX0szH/Ev+nYRRuWlolflfl" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+</head>
+<body>
+
+<div class="jumbotron text-center">
+    <h1>Serverless Image Processor</h1>
+    <p>Process And Analyze Images In Serverless Mode</p>
+</div>
+
+<div class="container">
+    <div class="row">
+        <div class="col-sm-4">
+            <h3>ML Model New</h3>
+            <p>This option allows you to extract Land Marks in a Image</p>
+            <form action="/getLabelMLModelNew">
+                Web URL of image to analyze:
+                <input type="text"
+                       name="imageUrl"
+                       value="https://www.google.com/images/branding/googlelogo/1x/googlelogo_color_272x92dp.png"/>
+                <input type="submit"/>
+            </form>
+        </div>
+    </div>
+</div>
+</body>
+</html>

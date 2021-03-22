@@ -18,28 +18,5 @@ public class ImageprocessorApplication {
 		SpringApplication.run(ImageprocessorApplication.class, args);
 	}
 
-	public static PubSubReceiver newPub = new PubSubReceiver();
-
-
-	@Bean
-	public CommandLineRunner getCommandLiner() {
-		return (args) -> {
-			String PROJECT_ID = ServiceOptions.getDefaultProjectId();
-			String SUBSCRIPTION_ID = "test-topic-sub";
-			ProjectSubscriptionName subscriptionName = ProjectSubscriptionName.of(PROJECT_ID, SUBSCRIPTION_ID);
-			Subscriber subscriber = null ;
-			Log log = LogFactory.getLog(ImageprocessorApplication.class);
-			log.info(String.format("Project, %s", PROJECT_ID) );
-			try {
-				subscriber = Subscriber.newBuilder(subscriptionName, newPub).build() ;
-				subscriber.startAsync().awaitRunning();
-				subscriber.awaitTerminated();
-				System.out.println(newPub.getGcsPath());
-			} catch (Exception ex) {
-				ex.printStackTrace();
-			}
-
-		} ;
-	}
 
 }

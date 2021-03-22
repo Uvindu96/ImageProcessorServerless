@@ -4,6 +4,8 @@ import com.google.api.gax.paging.Page;
 import com.google.cloud.storage.*;
 
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 
 public class GetImage {
 
@@ -49,4 +51,5 @@ public class GetImage {
         Blob copiedBlob = copyWriter.getResult();
         blob.delete();
     }
+
 }
