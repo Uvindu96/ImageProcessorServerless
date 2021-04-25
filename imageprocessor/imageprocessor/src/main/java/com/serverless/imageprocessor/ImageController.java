@@ -28,14 +28,12 @@ import org.tensorflow.Tensor;
 import javax.imageio.ImageIO;
 import java.awt.*;
 import java.awt.image.BufferedImage;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import java.util.*;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
+import java.nio.file.Files;
 
 
 
@@ -78,6 +76,7 @@ public class ImageController {
 
         map.addAttribute("annotations", imageLabels);
         map.addAttribute("imageUrl", gcsFilePath);
+
         newImage.moveImage();
 
         return new ModelAndView("result", map);
@@ -112,8 +111,8 @@ public class ImageController {
         Utill newUtil = new Utill();
         List <String> getLabelList = newUtil.bytesToStringList(labelBytes);
 
-        try (Tensor<Float> setImage = newP.constructAndExecuteGraphToNormalizeImage(getImageBytes)) {
-            float[] getLabelProbabilities = newP.executeInceptionGraph(modelBytes, setImage);
+        try (Tensor<Float> setImage = newP.GraphToNormalizeImage(getImageBytes)) {
+            float[] getLabelProbabilities = newP.executeGraph(modelBytes, setImage);
             int getBestLabelIdx = newP.maxIndex(getLabelProbabilities);
             System.out.println(
                     String.format("BEST MATCH: %s (%.2f%% likely)",
@@ -156,7 +155,6 @@ public class ImageController {
         map.addAttribute("imageUrl", gcsFilePath);
 
         newImage.moveImage();
-
         return new ModelAndView("result", map);
     }
 
@@ -186,7 +184,6 @@ public class ImageController {
                     System.out.format("Error: %s%n", getRes.getError().getMessage());
                 }
 
-
                 for (EntityAnnotation annotation : getRes.getTextAnnotationsList()) {
                     System.out.format("Text: %s%n", annotation.getDescription());
                     System.out.format("Position : %s%n", annotation.getBoundingPoly());
@@ -208,10 +205,9 @@ public class ImageController {
 
                 map.addAttribute("annotations", getImageLabels);
                 map.addAttribute("imageUrl", gcsFilePath);
-
-                newImage.moveImage();
             }
         }
+        newImage.moveImage();
         return new ModelAndView("result", map);
     }
 
@@ -243,7 +239,6 @@ public class ImageController {
         map.addAttribute("annotations", getImageLabels);
         map.addAttribute("imageUrl", gcsPath);
         newImage.moveImage();
-
         return new ModelAndView("result", map);
     }
 
@@ -258,10 +253,12 @@ public class ImageController {
         AnnotateImageResponse getResponse = this.cloudVisionTemplate.analyzeImage(
                 setImageResource, Feature.Type.FACE_DETECTION);
 
-        writeWithFaces(getGcsPath,getResponse.getFaceAnnotationsList());
+        writeFromFaces(getGcsPath,getResponse.getFaceAnnotationsList());
+        newImage.moveImage();
         return "Face Detection Completed Successfully";
+
     }
-    public void writeWithFaces(String gcsFilePath,List<FaceAnnotation> faces)
+    public void writeFromFaces(String gcsFilePath,List<FaceAnnotation> faces)
             throws IOException {
 
         String imageFile = gcsFilePath;
@@ -302,7 +299,7 @@ public class ImageController {
             try {
                 subscriber = Subscriber.newBuilder(subscriptionName, newPub).build() ;
                 subscriber.startAsync().awaitRunning();
-                subscriber.awaitTerminated(10, TimeUnit.SECONDS);
+                subscriber.awaitTerminated(5, TimeUnit.SECONDS);
                 System.out.println(newPub.getGcsPath());
             } catch (Exception ex) {
                 subscriber.stopAsync();

@@ -13,39 +13,23 @@ import org.tensorflow.Graph;
 import org.tensorflow.Output;
 import org.tensorflow.Session;
 import org.tensorflow.Tensor;
-import org.tensorflow.TensorFlow;
 import org.tensorflow.types.UInt8;
 
 public class PreProcessor {
-    private static void printUsage(PrintStream s) {
-        final String url =
-                "https://storage.googleapis.com/download.tensorflow.org/models/inception5h.zip";
-        s.println(
-                "Java program that uses a pre-trained Inception model (http://arxiv.org/abs/1512.00567)");
-        s.println("to label JPEG images.");
-        s.println("TensorFlow version: " + TensorFlow.version());
-        s.println();
-        s.println("Usage: label_image <model dir> <image file>");
-        s.println();
-        s.println("Where:");
-        s.println("<model dir> is a directory containing the unzipped contents of the inception model");
-        s.println("            (from " + url + ")");
-        s.println("<image file> is the path to a JPEG image file");
-    }
 
-    public void getImageDetail(String getModelDir, String getImageFile) {
+    public void getProcessImage(String getModelDir, String getImageFile) {
 
 
         String modelDir = getModelDir;
         String imageFile = getImageFile;
 
-        byte[] graphDef = readAllBytesOrExit(Paths.get(modelDir, "tensorflow_inception_graph.pb"));
+        byte[] graphDef = readAllBytes(Paths.get(modelDir, "tensorflow_inception_graph.pb"));
         List<String> labels =
-                readAllLinesOrExit(Paths.get(modelDir, "imagenet_comp_graph_label_strings.txt"));
-        byte[] imageBytes = readAllBytesOrExit(Paths.get(imageFile));
+                readAllLines(Paths.get(modelDir, "imagenet_comp_graph_label_strings.txt"));
+        byte[] imageBytes = readAllBytes(Paths.get(imageFile));
 
-        try (Tensor<Float> image = constructAndExecuteGraphToNormalizeImage(imageBytes)) {
-            float[] labelProbabilities = executeInceptionGraph(graphDef, image);
+        try (Tensor<Float> image = GraphToNormalizeImage(imageBytes)) {
+            float[] labelProbabilities = executeGraph(graphDef, image);
             int bestLabelIdx = maxIndex(labelProbabilities);
             System.out.println(
                     String.format("BEST MATCH: %s (%.2f%% likely)",
@@ -57,7 +41,7 @@ public class PreProcessor {
         }
     }
 
-    public static Tensor<Float> constructAndExecuteGraphToNormalizeImage(byte[] imageBytes) {
+    public static Tensor<Float> GraphToNormalizeImage(byte[] imageBytes) {
         try (Graph g = new Graph()) {
             GraphBuilder b = new GraphBuilder(g);
             // Some constants specific to the pre-trained model at:
@@ -92,7 +76,7 @@ public class PreProcessor {
         }
     }
 
-    public static float[] executeInceptionGraph(byte[] graphDef, Tensor<Float> image) {
+    public static float[] executeGraph(byte[] graphDef, Tensor<Float> image) {
         try (Graph g = new Graph()) {
             g.importGraphDef(graphDef);
             try (Session s = new Session(g);
@@ -122,7 +106,7 @@ public class PreProcessor {
         return best;
     }
 
-    public static byte[] readAllBytesOrExit(Path path) {
+    public static byte[] readAllBytes(Path path) {
         try {
             return Files.readAllBytes(path);
         } catch (IOException e) {
@@ -132,7 +116,7 @@ public class PreProcessor {
         return null;
     }
 
-    public static List<String> readAllLinesOrExit(Path path) {
+    public static List<String> readAllLines(Path path) {
         try {
             return Files.readAllLines(path, Charset.forName("UTF-8"));
         } catch (IOException e) {

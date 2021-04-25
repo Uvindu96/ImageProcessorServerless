@@ -13,12 +13,22 @@ public class PubSubReceiver implements MessageReceiver {
 
     public String gcsPath;
 
+    public String fileName;
+
     public String getGcsPath() {
         return gcsPath;
     }
 
     public void setGcsPath(String gcsPath) {
         this.gcsPath = gcsPath;
+    }
+
+    public String getFileName() {
+        return fileName;
+    }
+
+    public void setFileName(String fileName) {
+        this.fileName = fileName;
     }
 
     private Log log = LogFactory.getLog(PubSubReceiver.class);
@@ -41,6 +51,7 @@ public class PubSubReceiver implements MessageReceiver {
             System.out.println(String.format("Analyzing %s", getObjectName));
             System.out.println(String.format("Analyzing %s", gcsPath));
             setGcsPath(gcsPath);
+            setFileName(getObjectName);
             ackReplyConsumer.ack();
         }
 }
